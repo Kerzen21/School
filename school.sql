@@ -40,5 +40,3 @@ CREATE TABLE IF NOT EXISTS `Teachers` (
 
 
 COMMIT;
-#LF will be replaced by CRLF in school.sql.
-#The file will have its original line endings in your working directory

@@ -315,16 +315,16 @@ class SubjectDAO(DAO):
                 subject.subjectid = id_row[0]
         else:
             with con:
-                con.execute("UPDATE Subjects SET subjectid=?, title=?, teacherid=?, coef=? WHERE teacherid=?", [subject.subjectid, subject.title, subject.teacherid, subject.coef, subject.teacherid])
+                con.execute("UPDATE Subjects SET subjectid=?, title=?, teacherid=?, coef=? WHERE subjectid=?", [subject.subjectid, subject.title, subject.teacherid, subject.coef, subject.subjectid])
     
     @classmethod
-    def get_all(cls, teacherid=None):
+    def get_all(cls, subjectid=None):
         con = cls.get_connection()
         all_subjects=[]
-        if teacherid is None:
+        if subjectid is None:
             subject_rows = con.execute("SELECT subjectid, title, teacherid, coef FROM Subjects").fetchall()
         else:
-            subject_rows = con.execute("SELECT subjectid, title, teacherid, coef FROM Subjects WHERE teacherid=?", [teacherid]).fetchall()
+            subject_rows = con.execute("SELECT subjectid, title, teacherid, coef FROM Subjects WHERE subjectid=?", [subjectid]).fetchall()
 
         for subject_row in subject_rows:
             subjectid = subject_row[0]
@@ -374,38 +374,12 @@ if __name__ == "__main__":
     grade = Grade(subject.subjectid, student.studentid, 17)
     GradeDAO.save(grade)
 
-    print("Student avg grades: ", GradeDAO.get_student_average_grade(student.studentid))
-    sid = student.studentid
-    StudentDAO.delete(student.studentid)
-    print("get delete student: ", StudentDAO.get(sid))
-    print("Student avg grades (after): ", GradeDAO.get_student_average_grade(student.studentid))
-    SubjectDAO.delete(subject)
-    print("Student avg grades (after delete subject): ", GradeDAO.get_student_average_grade(student.studentid))
-
-    # print(SubjectDAO.get_all())
-
-
-
-
-    # subject = Subject(teacherid=1, title="Demo", coef=212)
-    # SubjectDAO.save(subject)
-    # print(subject)
+    # print("Student avg grades: ", GradeDAO.get_student_average_grade(student.studentid))
+    # sid = student.studentid
+    # StudentDAO.delete(student.studentid)
+    # print("get delete student: ", StudentDAO.get(sid))
+    # print("Student avg grades (after): ", GradeDAO.get_student_average_grade(student.studentid))
     # SubjectDAO.delete(subject)
+    # print("Student avg grades (after delete subject): ", GradeDAO.get_student_average_grade(student.studentid))
 
-
-    # students = StudentDAO.get_all()
-    # print(students) # [Student<1: Wolfgang B - 2000>, Student<1: James B - 2001>, ...]
-
-# Hausaufgabe 2019.10.06
-# 1. Completely implement the method GradeDAO.save  the method should be fully functionnal.
-# Indications can be taken from StudentDAO.save
-#
-# 2. Write the method StudentDAO.get_student_grades(studentid) which return all grades of the student with id: <studentid>
-
-
-# 2019.10.11
-# Update school.sql
-# 1. When a student is deleted, all his grades should be deleted
-# 2. When a subject is deleted, all corresponding grades should be deleted
-## This can be done by defining studentid and subjectid as foreign keys in the table Grades with an automated delete when the foreign key is deleted.
-
+   
