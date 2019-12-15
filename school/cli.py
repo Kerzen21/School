@@ -1,5 +1,5 @@
-import dao
-import models
+from . import dao
+from . import models
 
 
 def handle_student():

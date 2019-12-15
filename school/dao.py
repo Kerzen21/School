@@ -1,8 +1,11 @@
 import sqlite3
-from models import Grade
-from models import Student
-from models import Teacher
-from models import Subject
+# from models import Grade
+# from models import Student
+# from models import Teacher
+# from models import Subject
+
+from .models import Grade, Student, Teacher, Subject
+
 db_filename = "database.sqlite3"    #.db, .db3, .sqlite, .sqlite3
 db_create_script = "school.sql"
 
@@ -12,6 +15,8 @@ db_create_script = "school.sql"
 # con.row_factory = sqlite3.Row
 
 
+def get_db_connection(db_filename):
+    return sqlite3.connect(db_filename)
 
 
 
@@ -27,7 +32,7 @@ class DBManager(object):
     @classmethod
     def get_connection(cls) -> sqlite3.Connection:
         if cls._con is None:
-            cls._con = sqlite3.connect(db_filename)
+            cls._con = get_db_connection(db_filename)
 
             with open(db_create_script) as school_file:
                 school_script = school_file.read()
@@ -374,12 +379,12 @@ if __name__ == "__main__":
     grade = Grade(subject.subjectid, student.studentid, 17)
     GradeDAO.save(grade)
 
-    # print("Student avg grades: ", GradeDAO.get_student_average_grade(student.studentid))
-    # sid = student.studentid
-    # StudentDAO.delete(student.studentid)
-    # print("get delete student: ", StudentDAO.get(sid))
-    # print("Student avg grades (after): ", GradeDAO.get_student_average_grade(student.studentid))
-    # SubjectDAO.delete(subject)
-    # print("Student avg grades (after delete subject): ", GradeDAO.get_student_average_grade(student.studentid))
+    print("Student avg grades: ", GradeDAO.get_student_average_grade(student.studentid))
+    sid = student.studentid
+    StudentDAO.delete(student.studentid)
+    print("get delete student: ", StudentDAO.get(sid))
+    print("Student avg grades (after): ", GradeDAO.get_student_average_grade(student.studentid))
+    SubjectDAO.delete(subject)
+    print("Student avg grades (after delete subject): ", GradeDAO.get_student_average_grade(student.studentid))
 
    
