@@ -316,7 +316,7 @@ class SubjectDAO(DAO):
             #TODO: insert
             with con:
                 con.execute("INSERT INTO Subjects(subjectid, title, teacherid, coef) VALUES(?, ?, ?, ?)", [subject.subjectid, subject.title, subject.teacherid, subject.coef])
-                id_row = con.execute("SELECT last_insert_rowid()").fetchone()
+                id_row = con.execute("SELECT last_insert_rowid()").fetchone() # get_last_rowid(con)
                 subject.subjectid = id_row[0]
         else:
             with con:
@@ -331,6 +331,8 @@ class SubjectDAO(DAO):
         else:
             subject_rows = con.execute("SELECT subjectid, title, teacherid, coef FROM Subjects WHERE subjectid=?", [subjectid]).fetchall()
 
+        # [[subjectid, title, teacherid, coef], [e, f, g, h]]
+        # subject_rows = [1, "Math", 2, 3]
         for subject_row in subject_rows:
             subjectid = subject_row[0]
             title = subject_row[1]
