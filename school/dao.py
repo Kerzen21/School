@@ -19,12 +19,32 @@ def get_db_connection(db_filename):
     return sqlite3.connect(db_filename)
 
 
+# Hausaufgabe:
+# 1. ersetze anweisung der art: 
+# con.execute("UPDATE Subjects SET subjectid=?, title=?, teacherid=?, coef=? WHERE subjectid=?", [subject.subjectid, subject.title, subject.teacherid, subject.coef, subject.subjectid])  ##->Passiert in DAO!!!!
+# durch eine neue Funktion:
+# do_update(con, sql, params)
+# do_insert(con, sql, params)
+# do_delete(con, sql, params)
+# do_select(con, sql, params) ==> return selected values...
+
 
 # Project: Students administration, using the previously created tables
 # 1. Student: add, update, delete, show, get notes report, get student rank 
 # 2. Teacher: add, update, delete                                           <-- Alleine
 # 3. Note: add, update, delete, assign Teacher
 # 4. Note: add, update, delete student notes
+
+
+
+#TESTing:
+     #PArams always diffrent                 con.execute("UPDATE Subjects SET subjectid=?, title=?, teacherid=?, coef=? WHERE subjectid=?", [subject.subjectid, subject.title, subject.teacherid, subject.coef, subject.subjectid])
+
+
+    
+
+
+
 
 
 class DBManager(object):
@@ -41,7 +61,31 @@ class DBManager(object):
         # check if cls._con is still valid/connect otherwise, build a new connection
         
         return cls._con
-        
+    
+
+def do_update(con, sql, params):  
+    con.execute(sql, params)
+
+def do_insert(con, sql, params): 
+    con.execute(sql, params)
+    id_row = con.execute("select last_insert_rowid()").fetchone()
+    new_id = id_row[0]
+    return new_id
+    
+def do_delete(con, sql, params):  
+    con.execute(sql, params)
+
+def do_select(con, sql, params=None, fetchall=None):  
+
+    if fetchall == False:
+        res = con.execute(sql, params).fetchone()
+        return res 
+    else:
+        res = con.execute(sql, params).fetchall()
+        return res
+ 
+    #res = con.execute(sql="SELECT studentid ,firstname, lastname, birth_year FROM Students WHERE studentid=?", params=[studentid]).fetchone()
+
 class DAO(object): #Data access object
     
     @classmethod
@@ -73,7 +117,8 @@ class StudentDAO(DAO):
     def get(cls, studentid):
         con = cls.get_connection()
         
-        res = con.execute("SELECT studentid ,firstname, lastname, birth_year FROM Students WHERE studentid=?", [studentid]).fetchone()
+        #res = con.execute("SELECT studentid ,firstname, lastname, birth_year FROM Students WHERE studentid=?", [studentid]).fetchone()
+        res = do_select(con, "SELECT studentid ,firstname, lastname, birth_year FROM Students WHERE studentid=?", [studentid])
         if res is None:
             return None
 
@@ -102,30 +147,29 @@ class StudentDAO(DAO):
                     #con.__enter__()
             with con:   
                
-                con.execute("INSERT INTO Students(firstname, lastname, birth_year) VALUES(?, ?, ?)", [student.firstname, student.lastname, student.birth_year])
+                #con.execute("INSERT INTO Students(firstname, lastname, birth_year) VALUES(?, ?, ?)", [student.firstname, student.lastname, student.birth_year])
+                #id_row = con.execute("select last_insert_rowid()").fetchone()
+                #student.studentid = id_row[0]
+                new_id = do_insert(con, "INSERT INTO Students(firstname, lastname, birth_year) VALUES(?, ?, ?)",[student.firstname, student.lastname, student.birth_year])
+                student.studentid = new_id
             
-                id_row = con.execute("select last_insert_rowid()").fetchone()
-                student.studentid = id_row[0]
-                
-            #con.__exit__()
         else:
             with con:
-                con.execute("UPDATE Students SET firstname=?, lastname=?, birth_year=? WHERE studentid=?", [student.firstname, student.lastname, student.birth_year, student.studentid])
+                do_update(con,"UPDATE Students SET firstname=?, lastname=?, birth_year=? WHERE studentid=?", [student.firstname, student.lastname, student.birth_year, student.studentid])
+               
 
     @classmethod
     def delete(cls, studentid):
         con = cls.get_connection()
         with con:
-            con.execute("DELETE FROM Students WHERE studentid=?", [studentid])
-
+            do_delete(con, "DELETE FROM Students WHERE studentid=?", [studentid]))
 
 
     @classmethod
     def get_all(cls):
         con = cls.get_connection()
         all_students=[]
-        student_rows = con.execute("SELECT studentid, firstname, lastname, birth_year FROM Students").fetchall()
-        
+        do_select(con, "SELECT studentid, firstname, lastname, birth_year FROM Students", fetchall=True)
         #[(2, 'Tom', 'A', '', 2001), (3, 'Paul', 'C', None, 1998), (4, 'Arnold', 'D', None, 1997)
         for student_row in student_rows:
             #student: (2, 'Tom', 'A', '', 2001)
@@ -147,7 +191,8 @@ class TeacherDAO(DAO):
     @classmethod
     def get(cls, teacherid):
         con = cls.get_connection()
-        res =  con.execute("SELECT teacherid, name FROM Teachers WHERE teacherid=?", [teacherid]).fetchone()
+        res =  do_select(con, "SELECT teacherid, name FROM Teachers WHERE teacherid=?", [teacherid])
+        
         if res is None:
             return None
 
@@ -163,25 +208,23 @@ class TeacherDAO(DAO):
         if teacher.teacherid is None:  #--> Insert
             #TODO: insert
             with con:
-                con.execute("INSERT INTO Teachers(teacherid, name) VALUES(?, ?)", [teacher.teacherid, teacher.name])
-                id_row = con.execute("SELECT last_insert_rowid()").fetchone()
-                teacher.teacherid = id_row[0]
+                new_id = do_insert(con, "INSERT INTO Teachers(teacherid, name) VALUES(?, ?)", [teacher.teacherid, teacher.name])
+                teacher.teacherid = new_id
         else:
             with con:
-                con.execute("UPDATE Teachers SET teacherid=?, name=? WHERE teacherid=?", [teacher.teacherid, teacher.name, teacher.teacherid])
+                do_update(con, "UPDATE Teachers SET teacherid=?, name=? WHERE teacherid=?", [teacher.teacherid, teacher.name, teacher.teacherid])
 
     @classmethod
     def delete(cls, teacher):
         con = cls.get_connection()
         with con:
-            con.execute("DELETE FROM Teachers WHERE teacherid=?", [teacher.teacherid])
+            do_delete(con, "DELETE FROM Teachers WHERE teacherid=?", [teacher.teacherid])
 
     @classmethod
     def get_all(cls):
         con = cls.get_connection()
         all_teachers=[]
-        teacher_rows = con.execute("SELECT teacherid, name FROM Teachers").fetchall()
-
+        teacher_rows = do_select(con, "SELECT teacherid, name FROM Teachers", fetchall=True)
         for teacher_row in teacher_rows:
             teacherid = teacher_row[0]
             name = teacher_row[1]

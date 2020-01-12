@@ -6,8 +6,27 @@ import sqlite3
 from school import dao, models
 
 
-def get_db_connection(db_filename):
+def get_db_connection(db_filename=None):
     return sqlite3.connect(":memory:")
+
+
+class TestDoSelect(unittest.TestCase):
+    def test_fetchone(self):
+        con = get_db_connection()
+        res = do_select(con, "select 1", fetchall=False)
+        self.assertTrue(isinstance(res, tuple))
+
+    def test_fetchall(self):
+        con = get_db_connection()
+        do_select(con, "select 1", fetchall=True)
+        self.assertTrue(isinstance(res, list))
+        
+
+
+#Hausaufgabe for 2020.01.19
+# 1. Create a new test table with a primary key named "pk" and a column named "value"
+# 2. Create the corresponding test for do_insert and makre sure the correct <new_id> is returned.
+
 
 
 class TestDBManager(unittest.TestCase):
@@ -31,6 +50,18 @@ class TestStudentDAO(unittest.TestCase):
             self.assertEqual(student.firstname, "James")
             self.assertEqual(student.lastname, "W.")
             self.assertEqual(student.birth_year, 2019)
+    
+    def test_get_student2(self):
+        student_values = ['James', 'W.', 2019]
+        firstname, lastname, birth_year = student_values
+        with patch("school.dao.do_select", retun_value=student_values):
+            student = dao.StudentDAO.get(1)
+            self.assertEqual(student.studentid, 1)
+            self.assertEqual(student.firstname, firstname)
+            self.assertEqual(student.lastname, lastname)
+            self.assertEqual(student.birth_year, birth_year)
+
+
 
 
     def test_get_student_404(self): 
@@ -95,14 +126,6 @@ class TestSubjectDAO(unittest.TestCase):
 
 
 
-# Hausaufgabe:
-# 1. ersetze anweisung der art: 
-# con.execute("UPDATE Subjects SET subjectid=?, title=?, teacherid=?, coef=? WHERE subjectid=?", [subject.subjectid, subject.title, subject.teacherid, subject.coef, subject.subjectid])  ##->Passiert in DAO!!!!
-# durch eine neue Funktion:
-# do_update(con, sql, params)
-# do_insert(con, sql, params)
-# do_delete(con, sql, params)
-# do_select(con, sql, params) ==> return selected values...
 
 if __name__ == "__main__":
     unittest.main()
