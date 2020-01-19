@@ -76,6 +76,9 @@ def do_delete(con, sql, params):
     con.execute(sql, params)
 
 def do_select(con, sql, params=None, fetchall=None):  
+    if params is None:
+        params = []
+    
 
     if fetchall == False:
         res = con.execute(sql, params).fetchone()
@@ -162,7 +165,7 @@ class StudentDAO(DAO):
     def delete(cls, studentid):
         con = cls.get_connection()
         with con:
-            do_delete(con, "DELETE FROM Students WHERE studentid=?", [studentid]))
+            do_delete(con, "DELETE FROM Students WHERE studentid=?", [studentid])
 
 
     @classmethod

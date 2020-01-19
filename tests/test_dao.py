@@ -13,19 +13,52 @@ def get_db_connection(db_filename=None):
 class TestDoSelect(unittest.TestCase):
     def test_fetchone(self):
         con = get_db_connection()
-        res = do_select(con, "select 1", fetchall=False)
+        res = dao.do_select(con, "select 1", fetchall=False)
         self.assertTrue(isinstance(res, tuple))
 
     def test_fetchall(self):
         con = get_db_connection()
-        do_select(con, "select 1", fetchall=True)
+        res = dao.do_select(con, "select 1", fetchall=True)
         self.assertTrue(isinstance(res, list))
         
 
 
-#Hausaufgabe for 2020.01.19
-# 1. Create a new test table with a primary key named "pk" and a column named "value"
-# 2. Create the corresponding test for do_insert and makre sure the correct <new_id> is returned.
+#Hausaufgabe for 2020.01.26
+# 1. Replace the old con.execute statements with the help-functions: do_select, do_insert, do_delete and do_update
+# 2. Test each method of TeacherDAO, SubjectDAO, GradeDAO following the example of StudentDAO
+
+
+SQL_CREATE_TABLE = "CREATE TABLE test(value TEXT, pk INTEGER, PRIMARY KEY (pk))"
+
+class TestDoInsert(unittest.TestCase):            
+
+    def test_do_insert(self):
+        con = get_db_connection()
+        #create new empty table
+        con.execute(SQL_CREATE_TABLE) 
+        #insert the first element into the table, which should have the pk 1
+        pk = dao.do_insert(con, "INSERT INTO test(value) VALUES(?)", [2323])
+
+        self.assertEqual(pk, 1)
+
+
+class TestDoDelete(unittest.TestCase):
+    def test_do_delete(self):
+        con = get_db_connection()
+        con.execute(SQL_CREATE_TABLE)
+        
+        con.execute("INSERT INTO test(value) VALUES(?)", ["Hallo Welt"])
+
+        dao.do_delete(con, "DELETE FROM test WHERE pk=?", [1])
+
+
+        res = con.execute("SELECT value FROM test WHERE pk=?", [1]).fetchone()
+
+
+        self.assertIsNone(res)
+
+
+
 
 
 
@@ -41,22 +74,13 @@ class TestDBManager(unittest.TestCase):
 
 
 class TestStudentDAO(unittest.TestCase):
-    def test_get_student(self):
-        with patch("school.dao.StudentDAO.get_connection") as get_connection_mock:
-            get_connection_mock().execute().fetchone().__getitem__.side_effect = ['James', 'W.', 2019]
 
-            student = dao.StudentDAO.get(1)
-            self.assertEqual(student.studentid, 1)
-            self.assertEqual(student.firstname, "James")
-            self.assertEqual(student.lastname, "W.")
-            self.assertEqual(student.birth_year, 2019)
-    
-    def test_get_student2(self):
-        student_values = ['James', 'W.', 2019]
-        firstname, lastname, birth_year = student_values
-        with patch("school.dao.do_select", retun_value=student_values):
-            student = dao.StudentDAO.get(1)
-            self.assertEqual(student.studentid, 1)
+    def test_get_student(self):
+        student_values = [1, 'James', 'W.', 2019]
+        studentid, firstname, lastname, birth_year = student_values
+        with patch("school.dao.do_select", return_value=student_values):
+            student = dao.StudentDAO.get(studentid)
+            self.assertEqual(student.studentid, studentid)
             self.assertEqual(student.firstname, firstname)
             self.assertEqual(student.lastname, lastname)
             self.assertEqual(student.birth_year, birth_year)
@@ -64,22 +88,13 @@ class TestStudentDAO(unittest.TestCase):
 
 
 
-    def test_get_student_404(self): 
-        with patch("school.dao.StudentDAO.get_connection") as get_connection_mock:
-            # get_connection_mock().execute().fetchone().__getitem__.side_effect = ['Test', 'T.', 2020] #20
-            get_connection_mock.return_value.execute.return_value.fetchone.return_value = None
-
+    def test_get_student_404(self):
+        with patch("school.dao.do_select", return_value=None):
             student = dao.StudentDAO.get(1) #student = None
-
-
             self.assertIsNone(student)
 
 
 
-# Hausaufgabe:
-# 1. Schreibt einen Testfall für Student.get mit nicht vorhandenen Student
-
-# 2. Schreibt einen Testfall für Subject.get mit vorhandenen Subject
 
 class TestSubjectDAO(unittest.TestCase): 
     def test_get_subject(self):
@@ -123,6 +138,7 @@ class TestSubjectDAO(unittest.TestCase):
 
             self.assertEqual(subject.subjectid, subjectid)
             #
+  
 
 
 
