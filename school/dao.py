@@ -81,10 +81,10 @@ def do_select(con, sql, params=None, fetchall=None):
     
 
     if fetchall == False:
-        res = con.execute(sql, params).fetchone()
+        res = con.execute(sql, params).fetchone()   # (teacherid, name, )
         return res 
     else:
-        res = con.execute(sql, params).fetchall()
+        res = con.execute(sql, params).fetchall()   # [ (teacherid, name, ...), (teacherid, name, ...)]
         return res
  
     #res = con.execute(sql="SELECT studentid ,firstname, lastname, birth_year FROM Students WHERE studentid=?", params=[studentid]).fetchone()
@@ -256,8 +256,7 @@ class GradeDAO(DAO):
             return None
 
         
-        written_note = con.execute("SELECT subjectid, studentid, grade FROM Grades WHERE gradeid=?", [gradeid]).fetchone()   ###1. Aus Welcher Tabelle ziehen wir dies Information?
-        # ==> "SELECT subjectid, studentid, grade FROM Grades WHERE gradeid=10, ---> ? übernimmt den Wert in SQ-Brackets
+        written_note = do_select(con,"SELECT subjectid, studentid, grade FROM Grades WHERE gradeid=?", fetchall=False)
         
         if written_note is None:
             return None
@@ -277,21 +276,21 @@ class GradeDAO(DAO):
         if grade.gradeid is None:  #--> Insert
             #TODO: insert
             with con:
-                con.execute("INSERT INTO Grades(subjectid, studentid, grade) VALUES(?, ?, ?)", [grade.subjectid, grade.studentid ,grade.grade])
-                id_row = con.execute("SELECT last_insert_rowid()").fetchone()
+                do_insert(con, "INSERT INTO Grades(subjectid, studentid, grade) VALUES(?, ?, ?)", [grade.subjectid, grade.studentid ,grade.grade])
+                id_row = do_select(con, "SELECT last_insert_rowid()", fetchall=False)
                 grade.gradeid = id_row[0]
         else:
             with con:
-                con.execute("UPDATE Grades SET subjectid=?, studentid=?, grade=? WHERE gradeid=?", [grade.subjectid, grade.studentid, grade.grade, grade.gradeid])
-    
+                do_update(con, "UPDATE Grades SET subjectid=?, studentid=?, grade=? WHERE gradeid=?", [grade.subjectid, grade.studentid, grade.grade, grade.gradeid])
+                
     @classmethod
     def get_all(cls, studentid=None):
         con = cls.get_connection()
         all_grades=[]
         if studentid is None:
-            grade_rows = con.execute("SELECT gradeid, subjectid, studentid, grade FROM Grades").fetchall()
+            grade_rows = do_select(con, "SELECT gradeid, subjectid, studentid, grade FROM Grades", fetchall=True)    
         else:
-            grade_rows = con.execute("SELECT gradeid, subjectid, studentid, grade FROM Grades WHERE studentid=?", [studentid]).fetchall()
+            grade_rows = do_select(con, ("SELECT gradeid, subjectid, studentid, grade FROM Grades WHERE studentid=?", [studentid]), fetchall=True)   
 
 
         for grade_row in grade_rows:
@@ -315,7 +314,7 @@ class GradeDAO(DAO):
     @classmethod
     def get_student_average_grade(cls, studentid): # (artists.artistid=albums.artistid);
         con = cls.get_connection()
-        result = con.execute("""SELECT sum(grade*coef)/sum(coef) FROM Grades inner join Subjects on(Grades.subjectid=Subjects.subjectid) WHERE studentid=?""", [studentid]).fetchone()
+        result = do_select(con, ("""SELECT sum(grade*coef)/sum(coef) FROM Grades inner join Subjects on(Grades.subjectid=Subjects.subjectid) WHERE studentid=?""", [studentid]), fetchall=False)       
         if result is None:
             return None
         else:
@@ -326,9 +325,9 @@ class GradeDAO(DAO):
     def delete(cls, grade):
         con = cls.get_connection()
         with con:
-            con.execute("DELETE FROM Grades WHERE gradeid=?", [grade.gradeid])   
+            do_delete(con, "DELETE FROM Grades WHERE gradeid=?", [grade.gradeid]) 
+             
         
-
 
 
 class SubjectDAO(DAO):    
@@ -339,7 +338,7 @@ class SubjectDAO(DAO):
             return None
 
         
-        written_note = con.execute("SELECT subjectid, title, teacherid, coef FROM Subjects WHERE subjectid=?", [subjectid]).fetchone()   ###1. Aus Welcher Tabelle ziehen wir dies Information?
+        written_note = do_select(con, ("SELECT subjectid, title, teacherid, coef FROM Subjects WHERE subjectid=?", [subjectid]), fetchall=False)          
         # ==> "SELECT subjectid, studentid, grade FROM Grades WHERE gradeid=10, ---> ? übernimmt den Wert in SQ-Brackets
         
         if written_note is None:
@@ -361,23 +360,21 @@ class SubjectDAO(DAO):
         if subject.subjectid is None:  #--> Insert
             #TODO: insert
             with con:
-                con.execute("INSERT INTO Subjects(subjectid, title, teacherid, coef) VALUES(?, ?, ?, ?)", [subject.subjectid, subject.title, subject.teacherid, subject.coef])
-                id_row = con.execute("SELECT last_insert_rowid()").fetchone() # get_last_rowid(con)
-                subject.subjectid = id_row[0]
+                new_id = do_insert(con, "INSERT INTO Subjects(subjectid, title, teacherid, coef) VALUES(?, ?, ?, ?)", [subject.subjectid, subject.title, subject.teacherid, subject.coef])    
+                
+                subject.subjectid = new_id
         else:
             with con:
-                con.execute("UPDATE Subjects SET subjectid=?, title=?, teacherid=?, coef=? WHERE subjectid=?", [subject.subjectid, subject.title, subject.teacherid, subject.coef, subject.subjectid])
-    
+                do_update(con, "UPDATE Subjects SET subjectid=?, title=?, teacherid=?, coef=? WHERE subjectid=?", [subject.subjectid, subject.title, subject.teacherid, subject.coef, subject.subjectid])
+                
     @classmethod
-    def get_all(cls, subjectid=None):
+    def get_all(cls, teacherid=None):
         con = cls.get_connection()
         all_subjects=[]
-        if subjectid is None:
-            subject_rows = con.execute("SELECT subjectid, title, teacherid, coef FROM Subjects").fetchall()
-        else:
-            subject_rows = con.execute("SELECT subjectid, title, teacherid, coef FROM Subjects WHERE subjectid=?", [subjectid]).fetchall()
-
-        # [[subjectid, title, teacherid, coef], [e, f, g, h]]
+        if teacherid is None:
+            subject_rows = do_select(con, "SELECT subjectid, title, teacherid, coef FROM Subjects", fetchall=True) 
+        else: 
+            subject_rows = do_select(con, "SELECT subjectid, title, teacherid, coef FROM Subjects WHERE teacherid=?", [teacherid], fetchall=True) 
         # subject_rows = [1, "Math", 2, 3]
         for subject_row in subject_rows:
             subjectid = subject_row[0]
@@ -391,16 +388,18 @@ class SubjectDAO(DAO):
         return all_subjects
 
     @classmethod
-    def get_teacher_subject(cls, teacherid):
+    def get_teacher_subjects(cls, teacherid):
         return cls.get_all(teacherid=teacherid)
+
+
 
 
     @classmethod
     def delete(cls, subject):
         con = cls.get_connection()
         with con:
-            con.execute("DELETE FROM Subjects WHERE subjectid=?", [subject.subjectid])  
-
+            do_delete(con, "DELETE FROM Subjects WHERE subjectid=?", [subject.subjectid])
+            
 
 
     

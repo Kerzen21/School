@@ -31,7 +31,6 @@ class TestDoSelect(unittest.TestCase):
 SQL_CREATE_TABLE = "CREATE TABLE test(value TEXT, pk INTEGER, PRIMARY KEY (pk))"
 
 class TestDoInsert(unittest.TestCase):            
-
     def test_do_insert(self):
         con = get_db_connection()
         #create new empty table
@@ -92,28 +91,56 @@ class TestStudentDAO(unittest.TestCase):
         with patch("school.dao.do_select", return_value=None):
             student = dao.StudentDAO.get(1) #student = None
             self.assertIsNone(student)
+    
+    def test_integration(self):
+        with patch("school.dao.get_db_connection", get_db_connection):
+#           #TODO:
+#           #1. insert sstudent
+#           #2. get_all students
+#           #3. get student
+#           #4. update (and save) student
+#           #5. delete student
+#           #
+#
+#           student = models.Student("J", "B", 2010)
+#
+#           dao.StudentDAO.save(student)
+#
+#           # check studentid
+#           dao.StudentDAO.get_all()
+#           # [student]
+#
+#           student.firstname = "BCD"
+#           dao.StudentDAO.save(student)
+#
+#           student2 = dao.StudentDAO.get(student.studentid)
+#           # student2 == student
+
+            
+
+
 
 
 
 
 class TestSubjectDAO(unittest.TestCase): 
     def test_get_subject(self):
-        with patch("school.dao.SubjectDAO.get_connection") as get_connection_mock:
-            subjectid, title, teacherid, coef  = [1, "Math", 2, 3]
-            get_connection_mock.return_value.execute.return_value.fetchone.return_value = [subjectid, title, teacherid, coef]
+        subject_values = [1, "Math", 2, 3]
+        subjectid, title, teacherid, coef = subject_values          
+        with patch("school.dao.do_select", return_value=subject_values):
             
-            subject = dao.SubjectDAO.get(1)
+            subject = dao.SubjectDAO.get(subjectid)
 
             self.assertEqual(subject.subjectid, subjectid)
             self.assertEqual(subject.title, title)
             self.assertEqual(subject.teacherid, teacherid)
             self.assertEqual(subject.coef, coef)
 
-    def test_getall_subject(self):
-        with patch("school.dao.SubjectDAO.get_connection") as get_connection_mock:
-            subjectid, title, teacherid, coef  = [1, "Math", 2, 3]
-            get_connection_mock.return_value.execute.return_value.fetchall.return_value = [[subjectid, title, teacherid, coef]]
-            
+    def test_getall_subject_tid_none(self):
+        subject_values = [1, "Math", 2, 3]
+        subjectid, title, teacherid, coef = subject_values    
+        all_subjects_values = [subject_values]
+        with patch("school.dao.do_select", return_value= all_subjects_values):
             subjects = dao.SubjectDAO.get_all()
             
             subject = subjects[0]
@@ -121,23 +148,59 @@ class TestSubjectDAO(unittest.TestCase):
             self.assertEqual(subject.title, title)
             self.assertEqual(subject.teacherid, teacherid)
             self.assertEqual(subject.coef, coef)
+            
+    def test_get_teacher_subjects(self):
+        
+
+        teacherid = 2
+        
+        with patch("school.dao.do_select", return_value= []) as do_select_mock:
+            dao.SubjectDAO.get_teacher_subjects(teacherid)
+
+            do_select_mock.assert_called()
+            args = do_select_mock.call_args[0] #call_args = (args, kwargs) #teacher=2, 2
+            
+            _, sql, params = args
+
+
+            self.assertIn("teacherid=?", sql)
+            self.assertEqual(params[0], teacherid)
+            
+    def test_save_insert(self):
+        subject = models.Subject("Math", 2, 1)
+
+        with patch("school.dao.do_insert", return_value=1) as do_insert_mock:
+            dao.SubjectDAO.save(subject) #==> should call do_insert
+
+            do_insert_mock.assert_called()
     
-    def test_save_subject(self):
-        with patch("school.dao.SubjectDAO.get_connection") as get_connection_mock:
-            #get_connection_mock.assert_called_with()
-            subjectid, title, teacherid, coef  = [1, "Math", 2, 3]
-            #execute1 : None
-            #execute2 : 1
-            m_object = mock.Mock()
-            m_object.fetchone.return_value = (subjectid,)
-            get_connection_mock.return_value.execute.side_effect = [None, m_object]
+    def test_save_update(self):
+        subject = models.Subject("Math", 2, 1, subjectid=1)
+        dao.SubjectDAO.save(subject) #==> should call do_update
 
-            subject = models.Subject(title, coef, teacherid)
 
-            dao.SubjectDAO.save(subject)
 
-            self.assertEqual(subject.subjectid, subjectid)
-            #
+
+
+
+    # def test_save_subject(self):
+    #     with patch("school.dao.SubjectDAO.get_connection") as get_connection_mock:
+    #         #get_connection_mock.assert_called_with()
+    #         subjectid, title, teacherid, coef  = [1, "Math", 2, 3]
+    #         #execute1 : None
+    #         #execute2 : 1
+    #         m_object = mock.Mock()
+    #         m_object.fetchone.return_value = (subjectid,)
+    #         get_connection_mock.return_value.execute.side_effect = [None, m_object]
+
+    #         subject = models.Subject(title, coef, teacherid)
+
+    #         dao.SubjectDAO.save(subject)
+
+    #         self.assertEqual(subject.subjectid, subjectid)
+    # def test_get_teacher_subjects(self):
+    #     with patch("school.dao.SubjectDAO.get_connection") as get_connection_mock:
+
   
 
 
