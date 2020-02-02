@@ -80,11 +80,11 @@ def do_select(con, sql, params=None, fetchall=None):
         params = []
     
 
-    if fetchall == False:
-        res = con.execute(sql, params).fetchone()   # (teacherid, name, )
+    if fetchall:
+        res = con.execute(sql, params).fetchall()   # [ (teacherid, name, ...), (teacherid, name, ...)]
         return res 
     else:
-        res = con.execute(sql, params).fetchall()   # [ (teacherid, name, ...), (teacherid, name, ...)]
+        res = con.execute(sql, params).fetchone()   # (teacherid, name, )
         return res
  
     #res = con.execute(sql="SELECT studentid ,firstname, lastname, birth_year FROM Students WHERE studentid=?", params=[studentid]).fetchone()
@@ -125,7 +125,7 @@ class StudentDAO(DAO):
         if res is None:
             return None
 
-        # print(res)
+        #print(res)
         
         firstname = res[1]
         lastname = res[2]
@@ -172,7 +172,7 @@ class StudentDAO(DAO):
     def get_all(cls):
         con = cls.get_connection()
         all_students=[]
-        do_select(con, "SELECT studentid, firstname, lastname, birth_year FROM Students", fetchall=True)
+        student_rows = do_select(con, "SELECT studentid, firstname, lastname, birth_year FROM Students", fetchall=True)
         #[(2, 'Tom', 'A', '', 2001), (3, 'Paul', 'C', None, 1998), (4, 'Arnold', 'D', None, 1997)
         for student_row in student_rows:
             #student: (2, 'Tom', 'A', '', 2001)

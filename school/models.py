@@ -4,6 +4,20 @@ class Student(object):
         self.lastname =  lastname 
         self.studentid = studentid 
         self.birth_year = birth_year
+    #Student<1: Max Mustermann - 2000> != Student<2: Max Mustermann - 2000>
+    def __eq__(self, other):
+        #student1, student2
+
+        # student1==student2
+        # student1 == 2
+        # student1.__eq__(student2)
+
+        isinstance(1, int) # ==> True  # ist 1 ein int?
+        isinstance(1, str) # ==> False # ist 1 ein str?
+        if not isinstance(other, Student):
+            return False
+        
+        return self.firstname==other.firstname and self.lastname==other.lastname and self.birth_year==other.birth_year
 
     def __str__(self):
         return "Student<" + str(self.studentid) + ": " + self.firstname + " " + self.lastname + " - " + str(self.birth_year) + ">"

@@ -1,3 +1,15 @@
+import os
+import sys
+
+#path to this file
+path_to_test_dao = __file__
+# path to the directory containing this file
+path_to_tests = os.path.split(path_to_test_dao)[0] # return (parent_directory, file/directory)
+
+path_to_school_project = os.path.join(path_to_tests, "..")
+
+sys.path.append(path_to_school_project)
+
 import unittest
 from unittest.mock import patch
 from unittest import mock
@@ -94,29 +106,44 @@ class TestStudentDAO(unittest.TestCase):
     
     def test_integration(self):
         with patch("school.dao.get_db_connection", get_db_connection):
-#           #TODO:
-#           #1. insert sstudent
-#           #2. get_all students
-#           #3. get student
-#           #4. update (and save) student
-#           #5. delete student
-#           #
-#
-#           student = models.Student("J", "B", 2010)
-#
-#           dao.StudentDAO.save(student)
-#
-#           # check studentid
-#           dao.StudentDAO.get_all()
-#           # [student]
-#
-#           student.firstname = "BCD"
-#           dao.StudentDAO.save(student)
-#
-#           student2 = dao.StudentDAO.get(student.studentid)
-#           # student2 == student
+            
+
+           #Hausaufgabe for 2020.02.09
+           # Implement integration tests for the remaining classes: Grade, Treacher and Subject!!!!
+
+
+            student = models.Student("Max", "Mustermann", 2000)
+            dao.StudentDAO.save(student)
+
+            counter_student = len(dao.StudentDAO.get_all())
+            self.assertEqual(counter_student, 1)  
+        
+            student_clone = dao.StudentDAO.get(student.studentid)
+            self.assertEqual(student_clone, student)
+            
+            student2 = models.Student("Paul", "Mustermann", 3000)
+            dao.StudentDAO.save(student2)
+            
+            student2.firstname = "Max" #change in memory
+            student2.birth_year = 2000
+            self.assertEqual(student, student2)
+
+            dao.StudentDAO.save(student2) #change in the database
+            self.assertIsNotNone(student.studentid)
+
+            counter_student1 = len(dao.StudentDAO.get_all())
+
+            delete_student_2 = student2.studentid
+            dao.StudentDAO.delete(delete_student_2)
+
+            counter_student2 = len(dao.StudentDAO.get_all())
+
+            self.assertGreater(counter_student1, counter_student2)
 
             
+            
+
+           
 
 
 
