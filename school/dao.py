@@ -162,9 +162,18 @@ class StudentDAO(DAO):
                
 
     @classmethod
-    def delete(cls, studentid):
+    def delete(cls, student):
+        """
+        :param student: (int|Student) if not of type <Student>, student is considered as the studentid otherwise,
+                        the studentid attribute is extracted and used.
+        """
         con = cls.get_connection()
         with con:
+            if isinstance(student, Student):
+                studentid = student.studenid
+                student.studentid = None
+            else:
+                studentid = student
             do_delete(con, "DELETE FROM Students WHERE studentid=?", [studentid])
 
 
@@ -222,6 +231,7 @@ class TeacherDAO(DAO):
         con = cls.get_connection()
         with con:
             do_delete(con, "DELETE FROM Teachers WHERE teacherid=?", [teacher.teacherid])
+            teacher.teacherid = None
 
     @classmethod
     def get_all(cls):

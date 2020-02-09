@@ -140,11 +140,75 @@ class TestStudentDAO(unittest.TestCase):
 
             self.assertGreater(counter_student1, counter_student2)
 
-            
-            
 
+class TestGradeDAO(unittest.TestCase):
+    pass
+            
+            
+class TestTeacherDAO(unittest.TestCase):
+    def test_get_teacher(self):
+        teacher_values = [1, "Max Mustermann"]
+        teacherid, name = teacher_values
+        with patch("school.dao.do_select", return_value=teacher_values):
+            teacher = dao.TeacherDAO.get(teacherid)
+            self.assertEqual(teacher.teacherid, teacherid)
+            self.assertEqual(teacher.name, name)
+            
            
+    def test_integration(self):
+        with patch("school.dao.get_db_connection", get_db_connection):
 
+
+            teacher = models.Teacher("Max Mustermann")
+            dao.TeacherDAO.save(teacher)
+            self.assertIsNotNone(teacher.teacherid)
+
+            counter_teacher = len(dao.TeacherDAO.get_all())
+            self.assertEqual(counter_teacher, 1)  
+        
+            teacher_clone = dao.TeacherDAO.get(teacher.teacherid)
+            self.assertEqual(teacher_clone, teacher)
+            
+            teacher2 = models.Teacher("Tim Mustermann")
+            dao.TeacherDAO.save(teacher2)
+            # save(new object) vs save(update object)
+            
+            teacher2.name = "Max Mustermann" #change in memory
+            # change in the database
+            dao.TeacherDAO.save(teacher2)
+
+            
+            self.assertEqual(dao.TeacherDAO.get(teacher.teacherid), dao.TeacherDAO.get(teacher2.teacherid))
+            #E sqlite3.InterfaceError: Error binding parameter 0 - probably unsupported type.
+            
+
+            #python -m pytest .
+            
+
+            counter_teacher1 = len(dao.TeacherDAO.get_all())
+
+            delete_teacher_2 = teacher2.teacherid
+
+            #E           AttributeError: 'int' object has no attribute 'teacherid'
+            
+            dao.TeacherDAO.delete(teacher2) #deleted from DB
+            dao.TeacherDAO.save(teacher2) ##### teacher2.teacherid is None??? ~=2
+
+
+            dao.TeacherDAO.delete(teacher2.teacherid) #
+            teacher2.teacherid = None
+            dao.TeacherDAO.save(teacher2)
+
+
+            dao.TeacherDAO.delete(teacher2)
+
+
+
+            dao.TeacherDAO.delete(Teacher.delete_teacher_2)
+
+            counter_teacher2 = len(dao.TeacherDAO.get_all())
+
+            self.assertGreater(counter_teacher1, counter_teacher2)
 
 
 
@@ -205,30 +269,42 @@ class TestSubjectDAO(unittest.TestCase):
         subject = models.Subject("Math", 2, 1, subjectid=1)
         dao.SubjectDAO.save(subject) #==> should call do_update
 
+    def test_integration(self):
+        with patch("school.dao.get_db_connection", get_db_connection):
 
 
+            subject = models.Subject("English", 1, 2.5)
+            dao.SubjectDAO.save(subject)
+
+            counter_subject = len(dao.SubjectDAO.get_all()) #1
+            self.assertEqual(counter_subject, 1)  
+        
+            subject_clone = dao.SubjectDAO.get(subject.subjectid)
+            self.assertEqual(subject_clone, subject)
+            
+            subject2 = models.Subject("Math", 5, 4)
+            dao.SubjectDAO.save(subject2)
+            
+            subject2.title = "English" #change in memory
+            subject2.coef = 2.5
+            self.assertEqual(subject, subject2)
+
+            dao.SubjectDAO.save(subject2) #change in the database
+            self.assertIsNotNone(subject.subjectid)
+
+            counter_subject1 = len(dao.SubjectDAO.get_all())
+
+            delete_subject_2 = subject2.subjectid
+            dao.SubjectDAO.delete(delete_subject_2)
+
+            counter_subject2 = len(dao.SubjectDAO.get_all())
+
+            self.assertGreater(counter_subject1, counter_subject2)
 
 
+            teacher_subject = dao.SubjectDAO.get_teacher_subjects(1)  #<-- So richtig??
+            self.assertEqual(subject[2], teacher_subject)
 
-    # def test_save_subject(self):
-    #     with patch("school.dao.SubjectDAO.get_connection") as get_connection_mock:
-    #         #get_connection_mock.assert_called_with()
-    #         subjectid, title, teacherid, coef  = [1, "Math", 2, 3]
-    #         #execute1 : None
-    #         #execute2 : 1
-    #         m_object = mock.Mock()
-    #         m_object.fetchone.return_value = (subjectid,)
-    #         get_connection_mock.return_value.execute.side_effect = [None, m_object]
-
-    #         subject = models.Subject(title, coef, teacherid)
-
-    #         dao.SubjectDAO.save(subject)
-
-    #         self.assertEqual(subject.subjectid, subjectid)
-    # def test_get_teacher_subjects(self):
-    #     with patch("school.dao.SubjectDAO.get_connection") as get_connection_mock:
-
-  
 
 
 

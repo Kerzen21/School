@@ -46,6 +46,13 @@ class Subject(object):
         self.coef = coef
         self.subjectid = subjectid
         self.teacherid = teacherid
+    def __eq__(self, other):
+        isinstance(1, int) # ==> True  # ist 1 ein int?
+        isinstance(1, str) # ==> False # ist 1 ein str?
+        if not isinstance(other, Subject):
+            return False
+        
+        return self.title==other.title and self.coef==other.coef 
     def __str__(self):
         return "Subject<" + str(self.subjectid) + ": " + self.title +  ": " + str(self.teacherid) + ": " + str(self.coef) + ">"
     def __repr__(self):
@@ -55,7 +62,15 @@ class Subject(object):
 class Teacher(object):
     def __init__(self, name, teacherid=None):
         self.teacherid = teacherid
-        self.name = name 
+        self.name = name
+
+    def __eq__(self, other):
+        isinstance(1, int) # ==> True  # ist 1 ein int?
+        isinstance(1, str) # ==> False # ist 1 ein str?
+        if not isinstance(other, Teacher):
+            return False
+        
+        return self.name==other.name
     def __str__(self):
         return "Teacher<" + str(self.teacherid) + ": " + self.name + ">"
     def __repr__(self):
