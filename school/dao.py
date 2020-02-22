@@ -79,11 +79,12 @@ def do_select(con, sql, params=None, fetchall=None):
     if params is None:
         params = []
     
-
     if fetchall:
         res = con.execute(sql, params).fetchall()   # [ (teacherid, name, ...), (teacherid, name, ...)]
         return res 
     else:
+        # Params:  <class 'list'> []
+        # SQL;  <class 'tuple'> ('SELECT gradeid, subjectid, studentid, grade FROM Grades WHERE studentid=?', [2])
         res = con.execute(sql, params).fetchone()   # (teacherid, name, )
         return res
  
@@ -301,8 +302,11 @@ class GradeDAO(DAO):
         if studentid is None:
             grade_rows = do_select(con, "SELECT gradeid, subjectid, studentid, grade FROM Grades", fetchall=True)    
         else:
-            grade_rows = do_select(con, ("SELECT gradeid, subjectid, studentid, grade FROM Grades WHERE studentid=?", [studentid]), fetchall=True)   
-
+            grade_rows = do_select(con, "SELECT gradeid, subjectid, studentid, grade FROM Grades WHERE studentid=?", [studentid], fetchall=True)   
+    
+        
+   
+        
 
         for grade_row in grade_rows:
             gradeid = grade_row[0]
@@ -312,6 +316,7 @@ class GradeDAO(DAO):
 
             grade = Grade(gradeid=gradeid, subjectid=subjectid, studentid=studentid, grade=grade)
             all_grades.append(grade)
+                
         return all_grades
         
 
@@ -325,7 +330,8 @@ class GradeDAO(DAO):
     @classmethod
     def get_student_average_grade(cls, studentid): # (artists.artistid=albums.artistid);
         con = cls.get_connection()
-        result = do_select(con, ("""SELECT sum(grade*coef)/sum(coef) FROM Grades inner join Subjects on(Grades.subjectid=Subjects.subjectid) WHERE studentid=?""", [studentid]), fetchall=False)       
+        result = do_select(con, ("""SELECT sum(grade*coef)/sum(coef) FROM Grades inner join Subjects on(Grades.subjectid=Subjects.subjectid) WHERE studentid=?""", [studentid]), fetchall=False)    
+        #print(result[1])
         if result is None:
             return None
         else:

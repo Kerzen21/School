@@ -155,64 +155,51 @@ class TestGradeDAO(unittest.TestCase):
             self.assertEqual(grade.grade, grade_grade)
             
     def test_get_student_grades(self):
-        student_values = [1, "Tim", "Sailer", 2004]
-        studentid, firstname, lastname, birthyear = student_values
-        with patch("school.dao.do_select", return_value=student_values):
-            student_grade = dao.GradeDAO.get_student_grades(studentid)
-        print(student_grade)
+        grade_values = [[1, 2, 3, 5], [1, 3, 3, 15]]
+        
+        with patch("school.dao.do_select", return_value=grade_values) as do_select_mock:
+            student_grades = dao.GradeDAO.get_student_grades(grade_values[0][2])
+            do_select_mock.assert_called()
+            self.assertEqual(len(student_grades), 2, "There should be exactly one student grade!!!")
+            
+     
 
-    def test_get_student_averade_grade(self):
-        student_values = [1, "Tim", "Sailer", 2004]
-        studentid, firstname, lastname, birthyear = student_values
-        with patch("school.dao.do_select", return_value=student_values):
-            student_average_grade = dao.GradeDAO.get_student_average_grade(studentid)
-        print(student_average_grade)
-
-#self = <test_dao.TestGradeDAO testMethod=test_get_student_grades>
-#
-#    def test_get_student_grades(self):
-#        student_values = [1, "Tim", "Sailer", 2004]
-#        studentid, firstname, lastname, birthyear = student_values
-#        with patch("school.dao.do_select", return_value=student_values):
-#>           student_grade = dao.GradeDAO.get_student_grades(studentid)
-#
-#tests\test_dao.py:161:
-
-
-#cls = <class 'school.dao.GradeDAO'>, studentid = 1
-#
-#    @classmethod
-#    def get_all(cls, studentid=None):
-#        con = cls.get_connection()
-#        all_grades=[]
-#        if studentid is None:
-#            grade_rows = do_select(con, "SELECT gradeid, subjectid, studentid, grade FROM Grades", fetchall=True)
-#        else:
-#            grade_rows = do_select(con, ("SELECT gradeid, subjectid, studentid, grade FROM Grades WHERE studentid=?", [studentid]), fetchall=True)
-#    
-#    
-#        for grade_row in grade_rows:
-#>           gradeid = grade_row[0]
-#E           TypeError: 'int' object is not subscriptable
-#
-#school\dao.py:308: TypeError
+    def test_get_student_average_grade(self):
+        do_select_result = [2.7]
+        
+        with patch("school.dao.do_select", return_value=do_select_result) as do_select_mock:
+            result = dao.GradeDAO.get_student_average_grade(1)
+            do_select_mock.assert_called()
+            self.assertEqual(result, do_select_result[0])
+            #print(student_grades) 
 
 
 
 
+    def test_integration_grade(self):
+        with patch("school.dao.get_db_connection", get_db_connection):
+            student = models.Student(firstname="Paul", lastname="Müller", birth_year=2000)
+            dao.StudentDAO.save(student)
+            
+            subject1 = models.Subject(title="Math", coef=3, teacherid=1)
+            dao.SubjectDAO.save(subject1)
+            subject2 = models.Subject(title="English", coef=5, teacherid=1)
+            dao.SubjectDAO.save(subject2)
+            
+            grade1 = models.Grade(subjectid=subject1.subjectid, studentid=student.studentid, grade=15)
+            dao.GradeDAO.save(grade1)
+            grade2 = models.Grade(subjectid=subject2.subjectid, studentid=student.studentid, grade=10)
+            dao.GradeDAO.save(grade2)
 
 
+            grades_res = dao.GradeDAO.get_student_grades(student.studentid)
+            print(grades_res)
+            self.assertEqual(grades_res, [grade1, grade2])
 
 
-
-
-
-
-
-
-
-
-
+    
+            #test get_student_grades
+            #test get_student_average_grade
 
 
 
@@ -375,6 +362,9 @@ class TestSubjectDAO(unittest.TestCase):
 
             subject = models.Subject("English", 2.5, 1)
             dao.SubjectDAO.save(subject)
+
+
+            print("All subjects: ", dao.SubjectDAO.get_all())
 
             counter_subject = len(dao.SubjectDAO.get_all()) #1
             self.assertEqual(counter_subject, 1)  
