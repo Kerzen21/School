@@ -27,12 +27,18 @@ class Student(object):
         return self.__str__()
 
 
-class Grade(object):  #1. Wozu Brauchen wir models(Kann mich nicht mehr errrinern : /  )?  2.Wieso brauchen wir Note in Model?
+class Grade(object):  
     def __init__(self, subjectid, studentid, grade, gradeid=None):
         self.subjectid = subjectid
         self.studentid = studentid
         self.gradeid = gradeid
         self.grade = grade
+
+    def __eq__(self, other):
+        if not isinstance(other, Grade):
+            return False
+        return self.subjectid==other.subjectid and self.studentid==other.studentid and self.grade==other.grade
+
     def __str__(self):
         return "Grade<" + str(self.gradeid) + ": " + str(self.subjectid) + " " + str(self.studentid) + " - " + str(self.grade) + ">"
     

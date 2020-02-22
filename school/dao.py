@@ -266,14 +266,15 @@ class GradeDAO(DAO):
             return None
 
         
-        written_note = do_select(con,"SELECT subjectid, studentid, grade FROM Grades WHERE gradeid=?", fetchall=False)
+        written_note = do_select(con, "SELECT gradeid, subjectid, studentid, grade FROM Grades WHERE gradeid=?", [gradeid], fetchall=False)
         
         if written_note is None:
             return None
             
-        subjectid = written_note[0]
-        studentid = written_note[1]
-        grade = written_note[2]
+        gradeid = written_note[0]
+        subjectid = written_note[1]
+        studentid = written_note[2]
+        grade = written_note[3]
         
         final_grade = Grade(subjectid=subjectid, studentid=studentid, grade=grade, gradeid=gradeid)
         return final_grade
@@ -348,7 +349,7 @@ class SubjectDAO(DAO):
             return None
 
         
-        written_note = do_select(con, ("SELECT subjectid, title, teacherid, coef FROM Subjects WHERE subjectid=?", [subjectid]), fetchall=False)          
+        written_note = do_select(con, "SELECT subjectid, title, teacherid, coef FROM Subjects WHERE subjectid=?", [subjectid], fetchall=False)          
         # ==> "SELECT subjectid, studentid, grade FROM Grades WHERE gradeid=10, ---> ? übernimmt den Wert in SQ-Brackets
         
         if written_note is None:

@@ -35,9 +35,10 @@ class TestDoSelect(unittest.TestCase):
         
 
 
-#Hausaufgabe for 2020.01.26
-# 1. Replace the old con.execute statements with the help-functions: do_select, do_insert, do_delete and do_update
-# 2. Test each method of TeacherDAO, SubjectDAO, GradeDAO following the example of StudentDAO
+#Hausaufgabe for 2020.02.23
+# integerate the following tests in GradeDAO's integration test
+# - test get_student_grades
+# - test get_student_average_grade
 
 
 SQL_CREATE_TABLE = "CREATE TABLE test(value TEXT, pk INTEGER, PRIMARY KEY (pk))"
@@ -142,8 +143,123 @@ class TestStudentDAO(unittest.TestCase):
 
 
 class TestGradeDAO(unittest.TestCase):
-    pass
+    def test_get_grade(self):
+        grade_values = [6, 2, 4, 7]
+        gradeid, subjectid, studentid, grade_grade = grade_values
+        with patch("school.dao.do_select", return_value=grade_values):
+            grade = dao.GradeDAO.get(gradeid)  #sbjid, stdid, grd   final_grade = Grade(subjectid=subjectid, studentid=studentid, grade=grade, gradeid=gradeid)
             
+            self.assertEqual(grade.gradeid, gradeid)
+            self.assertEqual(grade.subjectid, subjectid)
+            self.assertEqual(grade.studentid, studentid)
+            self.assertEqual(grade.grade, grade_grade)
+            
+    def test_get_student_grades(self):
+        student_values = [1, "Tim", "Sailer", 2004]
+        studentid, firstname, lastname, birthyear = student_values
+        with patch("school.dao.do_select", return_value=student_values):
+            student_grade = dao.GradeDAO.get_student_grades(studentid)
+        print(student_grade)
+
+    def test_get_student_averade_grade(self):
+        student_values = [1, "Tim", "Sailer", 2004]
+        studentid, firstname, lastname, birthyear = student_values
+        with patch("school.dao.do_select", return_value=student_values):
+            student_average_grade = dao.GradeDAO.get_student_average_grade(studentid)
+        print(student_average_grade)
+
+#self = <test_dao.TestGradeDAO testMethod=test_get_student_grades>
+#
+#    def test_get_student_grades(self):
+#        student_values = [1, "Tim", "Sailer", 2004]
+#        studentid, firstname, lastname, birthyear = student_values
+#        with patch("school.dao.do_select", return_value=student_values):
+#>           student_grade = dao.GradeDAO.get_student_grades(studentid)
+#
+#tests\test_dao.py:161:
+
+
+#cls = <class 'school.dao.GradeDAO'>, studentid = 1
+#
+#    @classmethod
+#    def get_all(cls, studentid=None):
+#        con = cls.get_connection()
+#        all_grades=[]
+#        if studentid is None:
+#            grade_rows = do_select(con, "SELECT gradeid, subjectid, studentid, grade FROM Grades", fetchall=True)
+#        else:
+#            grade_rows = do_select(con, ("SELECT gradeid, subjectid, studentid, grade FROM Grades WHERE studentid=?", [studentid]), fetchall=True)
+#    
+#    
+#        for grade_row in grade_rows:
+#>           gradeid = grade_row[0]
+#E           TypeError: 'int' object is not subscriptable
+#
+#school\dao.py:308: TypeError
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    def test_integration(self):
+        with patch("school.dao.get_db_connection", get_db_connection):
+            grade = models.Grade(7, 5, 3)
+            dao.GradeDAO.save(grade)
+            self.assertIsNotNone(grade.gradeid)
+
+            counter_grade = len(dao.GradeDAO.get_all())
+            self.assertEqual(counter_grade, 1)  
+        
+            grade_clone =  dao.GradeDAO.get(grade.gradeid)
+            self.assertEqual(type(grade_clone), type(grade))
+            print("Grade:", grade)
+            print("Grade Clone:", grade_clone)
+            self.assertEqual(grade_clone, grade)
+            
+            grade2 = models.Grade(7, 5, 2)
+            dao.GradeDAO.save(grade2)
+            self.assertIsNotNone(grade2.gradeid)
+
+            grade2.grade = 3
+
+            dao.GradeDAO.save(grade2)
+
+            self.assertEqual(dao.GradeDAO.get(grade.gradeid), dao.GradeDAO.get(grade2.gradeid))
+
+            counter_grade1 = len(dao.GradeDAO.get_all())
+
+           
+
+    
+            dao.GradeDAO.delete(grade2) 
+            grade2.gradeid = None
+
+            
+
+            #dao.GradeDAO.delete(grade.delete_grade_2)
+
+            counter_grade2 = len(dao.GradeDAO.get_all())
+
+            self.assertGreater(counter_grade1, counter_grade2)
+            
+            
+
             
 class TestTeacherDAO(unittest.TestCase):
     def test_get_teacher(self):
@@ -187,25 +303,9 @@ class TestTeacherDAO(unittest.TestCase):
 
             counter_teacher1 = len(dao.TeacherDAO.get_all())
 
-            delete_teacher_2 = teacher2.teacherid
-
-            #E           AttributeError: 'int' object has no attribute 'teacherid'
-            
-            dao.TeacherDAO.delete(teacher2) #deleted from DB
-            dao.TeacherDAO.save(teacher2) ##### teacher2.teacherid is None??? ~=2
-
-
-            dao.TeacherDAO.delete(teacher2.teacherid) #
+            dao.TeacherDAO.delete(teacher2) 
             teacher2.teacherid = None
-            dao.TeacherDAO.save(teacher2)
-
-
-            dao.TeacherDAO.delete(teacher2)
-
-
-
-            dao.TeacherDAO.delete(Teacher.delete_teacher_2)
-
+           
             counter_teacher2 = len(dao.TeacherDAO.get_all())
 
             self.assertGreater(counter_teacher1, counter_teacher2)
@@ -273,7 +373,7 @@ class TestSubjectDAO(unittest.TestCase):
         with patch("school.dao.get_db_connection", get_db_connection):
 
 
-            subject = models.Subject("English", 1, 2.5)
+            subject = models.Subject("English", 2.5, 1)
             dao.SubjectDAO.save(subject)
 
             counter_subject = len(dao.SubjectDAO.get_all()) #1
@@ -285,25 +385,29 @@ class TestSubjectDAO(unittest.TestCase):
             subject2 = models.Subject("Math", 5, 4)
             dao.SubjectDAO.save(subject2)
             
-            subject2.title = "English" #change in memory
+            subject2.title = "English"
             subject2.coef = 2.5
-            self.assertEqual(subject, subject2)
+            subject2.teacherid = 1
+            # dao.SubjectDAO.save(subject2)
+            # self.assertEqual(subject, subject2)
 
             dao.SubjectDAO.save(subject2) #change in the database
             self.assertIsNotNone(subject.subjectid)
 
             counter_subject1 = len(dao.SubjectDAO.get_all())
 
-            delete_subject_2 = subject2.subjectid
-            dao.SubjectDAO.delete(delete_subject_2)
+            
+            dao.SubjectDAO.delete(subject2)
 
             counter_subject2 = len(dao.SubjectDAO.get_all())
 
             self.assertGreater(counter_subject1, counter_subject2)
 
-
-            teacher_subject = dao.SubjectDAO.get_teacher_subjects(1)  #<-- So richtig??
-            self.assertEqual(subject[2], teacher_subject)
+            # subject = (1, 2, 3, 5)
+            # subject.subjectid = 1
+            #[subject, subject2]
+            teacher_subjects = dao.SubjectDAO.get_teacher_subjects(1)  #<-- So richtig??
+            self.assertEqual(teacher_subjects, [subject])
 
 
 
