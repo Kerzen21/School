@@ -19,10 +19,13 @@ from school import dao, models
 
 
 def get_db_connection(db_filename=None):
+    print("fake: get_db_connection")
     return sqlite3.connect(":memory:")
 
 
 class TestDoSelect(unittest.TestCase):
+
+
     def test_fetchone(self):
         con = get_db_connection()
         res = dao.do_select(con, "select 1", fetchall=False)
@@ -42,7 +45,7 @@ class TestDoSelect(unittest.TestCase):
 
 
 SQL_CREATE_TABLE = "CREATE TABLE test(value TEXT, pk INTEGER, PRIMARY KEY (pk))"
-
+@patch("school.dao.get_db_connection", get_db_connection)
 class TestDoInsert(unittest.TestCase):            
     def test_do_insert(self):
         con = get_db_connection()
@@ -53,7 +56,7 @@ class TestDoInsert(unittest.TestCase):
 
         self.assertEqual(pk, 1)
 
-
+@patch("school.dao.get_db_connection", get_db_connection)
 class TestDoDelete(unittest.TestCase):
     def test_do_delete(self):
         con = get_db_connection()
@@ -73,8 +76,11 @@ class TestDoDelete(unittest.TestCase):
 
 
 
-
+@patch("school.dao.get_db_connection", get_db_connection)
 class TestDBManager(unittest.TestCase):
+    def setUp(self):
+        dao.DBManager._con = None
+
     def test_get_connection(self):
         with patch("school.dao.get_db_connection", get_db_connection):
             connection = dao.DBManager.get_connection()
@@ -84,8 +90,11 @@ class TestDBManager(unittest.TestCase):
             connection.execute("select * from subjects")
 
 
-
+@patch("school.dao.get_db_connection", get_db_connection)
 class TestStudentDAO(unittest.TestCase):
+    def setUp(self):
+        dao.DBManager._con = None
+
 
     def test_get_student(self):
         student_values = [1, 'James', 'W.', 2019]
@@ -141,8 +150,11 @@ class TestStudentDAO(unittest.TestCase):
 
             self.assertGreater(counter_student1, counter_student2)
 
-
+@patch("school.dao.get_db_connection", get_db_connection)
 class TestGradeDAO(unittest.TestCase):
+    def setUp(self):
+        dao.DBManager._con = None
+
     def test_get_grade(self):
         grade_values = [6, 2, 4, 7]
         gradeid, subjectid, studentid, grade_grade = grade_values
@@ -247,8 +259,11 @@ class TestGradeDAO(unittest.TestCase):
             
             
 
-            
+@patch("school.dao.get_db_connection", get_db_connection)            
 class TestTeacherDAO(unittest.TestCase):
+    def setUp(self):
+        dao.DBManager._con = None
+
     def test_get_teacher(self):
         teacher_values = [1, "Max Mustermann"]
         teacherid, name = teacher_values
@@ -300,8 +315,11 @@ class TestTeacherDAO(unittest.TestCase):
 
 
 
-
+@patch("school.dao.get_db_connection", get_db_connection)
 class TestSubjectDAO(unittest.TestCase): 
+    def setUp(self):
+        dao.DBManager._con = None
+
     def test_get_subject(self):
         subject_values = [1, "Math", 2, 3]
         subjectid, title, teacherid, coef = subject_values          
