@@ -16,7 +16,7 @@ db_create_script = "school.sql"
 
 
 def get_db_connection(db_filename):
-    return sqlite3.connect(db_filename)
+    return sqlite3.connect(db_filename, check_same_thread=False)
 
 
 # Hausaufgabe:
