@@ -171,7 +171,7 @@ class StudentDAO(DAO):
         con = cls.get_connection()
         with con:
             if isinstance(student, Student):
-                studentid = student.studenid
+                studentid = student.studentid
                 student.studentid = None
             else:
                 studentid = student

@@ -3,13 +3,6 @@ app = Flask(import_name=__name__)
 from . import dao
 from . import models
 
-# Homework for 2020.03.15
-# add a file web.py in school
-# the file should be a flask app which does the following:
-# the route /students is available and returns all students of the school!!!
-
-#models.Student  # import models was used
-#    Student         # from .models import Student was used
 
 """
 /
@@ -49,22 +42,11 @@ def students_handle():
 
 
 
-
-#### Homework!!!
-# 1.  in list student, consider that you can
-# Firstname: <student.firstname>
-# Lastname: <student.lastname>
-# ...
-# 2. Read how to set default values in html input fields
-# define the resource /students/edit, that allow to edit the first student!!!
-
-
-
 @app.route("/students/list", methods=["GET"])
 def student_list():
     all_students = dao.StudentDAO.get_all()   #-->No IF and Else needed // request(ed).Method 
     #return str(all_students)                  #only allows given methods to be used!
-    return render_template("students/list.html", students=all_students, student=student[0])
+    return render_template("students/list.html", students=all_students, student=all_students[0])
 
 
 
@@ -79,8 +61,42 @@ def student_add():
         student_lastname = request.form.get("last", "")
         student_birthyear = request.form.get("birth", "")
         student = models.Student(student_firstname, student_lastname, student_birthyear)
+        dao.StudentDAO.save(student)
         return "Student wurde erstellt!" 
         
+@app.route("/students/edit", methods=["GET", "POST"])       #PLS Explain Put!!! and patch https://developer.mozilla.org/de/docs/Web/HTTP/Methods
+def student_edit():
+    #"/students/edit?id=1"
+    if request.method == "GET":
+        studentid = request.args.get("id")
+        #student.studentid, student.firstname
+        return render_template("students/edit.html", student=dao.StudentDAO.get(studentid))
+    else: #<1: firstname lastname - 2019>
+        student_id = request.form.get("id", "")
+        student_firstname = request.form.get("first", "")
+        student_lastname = request.form.get("last", "")
+        student_birthyear = request.form.get("birth", "")
+        student = models.Student(student_firstname, student_lastname, student_birthyear, student_id)
+        
+        dao.StudentDAO.save(student)
+        return "Student wurde bearbeitet!" 
+
+@app.route("/students/delete", methods=["GET"])       #PLS Explain Put!!! and patch https://developer.mozilla.org/de/docs/Web/HTTP/Methods
+def student_delete():
+        studentid = request.args.get("id")
+        student = dao.StudentDAO.get(studentid)
+        dao.StudentDAO.delete(student)
+        return render_template("students/delete.html")
+
+
+
+# 
+
+
+# Homework
+# 1. Make it possible to navigate though the website with the browser "back-button"
+# e.g.: A back button from /students/edit to /students and from /students/edit to / 
+# Students for everything
 
 if __name__ == "__main__":
     app.run(threaded=False, processes=1, debug=True)
