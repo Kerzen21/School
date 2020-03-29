@@ -1,17 +1,6 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>School management project - Students</title>
-    </head>
-    <body>
-        <!-- {{students}} -->
-
-        {% for student in students %}
-           
-            {{student}} <a href="/students/edit?id={{student.studentid}}">Edit</a>  <a href="/students/delete?id={{student.studentid}}">Delete</a><br>
-            
-
-        {% endfor %}
-        <a href="/students">Home</a>
-    </body>
-</html>
+{% extends "students/base.html" %}
+{% block content %}
+    {% for student in students %}
+        {{student}} <a href="/students/edit?id={{student.studentid}}">Edit</a>  <a href="/students/delete?id={{student.studentid}}">Delete</a><br>
+    {% endfor %}      
+{% endblock %}

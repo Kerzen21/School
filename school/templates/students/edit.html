@@ -1,4 +1,6 @@
-<a href="/students">Home</a>  
+{% extends "students/base.html" %}
+
+{% block content %}
 <form action="#" method="POST">      
     <input id="id" type="hidden" name ="id" value="{{student.studentid}}">
     <br>
@@ -13,5 +15,4 @@
     <br>
     <input type="submit">
     <input type="reset"> 
-    
-</form> 
+{% endblock %}

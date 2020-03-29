@@ -1,4 +1,6 @@
+{% extends "students/base.html" %}
 
+{% block content %}
 <form action="#" method="POST">
     <label for="first">First Name: </label>
     <input id="first" type="text" name ="first">
@@ -12,4 +14,4 @@
     <input type="submit">
     <input type="reset">   
 </form>
-<a href="/students">Home</a>
+{% endblock %}

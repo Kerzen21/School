@@ -46,8 +46,7 @@ def students_handle():
 def student_list():
     all_students = dao.StudentDAO.get_all()   #-->No IF and Else needed // request(ed).Method 
     #return str(all_students)                  #only allows given methods to be used!
-    return render_template("students/list.html", students=all_students, student=all_students[0])
-
+    return render_template("students/list.html", students=all_students)
 
 
 
@@ -90,7 +89,11 @@ def student_delete():
 
 
 
+<<<<<<< HEAD
 # 
+=======
+
+>>>>>>> Addition of a Base.html file | Base in every file/ Saves space | Gunicorn installed | old changes
 
 
 # Homework
