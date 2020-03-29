@@ -89,13 +89,6 @@ def student_delete():
 
 
 
-<<<<<<< HEAD
-# 
-=======
-
->>>>>>> Addition of a Base.html file | Base in every file/ Saves space | Gunicorn installed | old changes
-
-
 # Homework
 # 1. Make it possible to navigate though the website with the browser "back-button"
 # e.g.: A back button from /students/edit to /students and from /students/edit to / 
