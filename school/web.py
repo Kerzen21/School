@@ -1,5 +1,6 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for, flash
 app = Flask(import_name=__name__)
+app.config["SECRET_KEY"] = "askjhdfaskdjfhaksdjfhasdkjfahsdkfjashdfjasdhf"
 from . import dao
 from . import models
 
@@ -61,13 +62,14 @@ def student_add():
         student_birthyear = request.form.get("birth", "")
         student = models.Student(student_firstname, student_lastname, student_birthyear)
         dao.StudentDAO.save(student)
-        return "Student wurde erstellt!" 
+        flash(f"The student has been added!") 
+        return redirect("/students/list") 
         
 @app.route("/students/edit", methods=["GET", "POST"])       #PLS Explain Put!!! and patch https://developer.mozilla.org/de/docs/Web/HTTP/Methods
 def student_edit():
     #"/students/edit?id=1"
+    studentid = request.args.get("id")
     if request.method == "GET":
-        studentid = request.args.get("id")
         #student.studentid, student.firstname
         return render_template("students/edit.html", student=dao.StudentDAO.get(studentid))
     else: #<1: firstname lastname - 2019>
@@ -78,21 +80,45 @@ def student_edit():
         student = models.Student(student_firstname, student_lastname, student_birthyear, student_id)
         
         dao.StudentDAO.save(student)
-        return "Student wurde bearbeitet!" 
+        flash(f"The student with id <{studentid}> has been edited!") 
+        return redirect("/students/list")
 
-@app.route("/students/delete", methods=["GET"])       #PLS Explain Put!!! and patch https://developer.mozilla.org/de/docs/Web/HTTP/Methods
+@app.route("/students/delete")       #PLS Explain Put!!! and patch https://developer.mozilla.org/de/docs/Web/HTTP/Methods
 def student_delete():
-        studentid = request.args.get("id")
+    print(request.args)
+    studentid = request.args.get("id")
+    if 'confirmation' in request.args:
         student = dao.StudentDAO.get(studentid)
         dao.StudentDAO.delete(student)
-        return render_template("students/delete.html")
+        #return render_template("students/ist.html")
+        flash(f"The student with id <{studentid}> has been deleted!")
+
+        return redirect("/students/list")
+    else:
+        return render_template("students/delete.html", studentid=studentid)
+
+
+
+
+# ssh school@tube.ddns.net
+
+
+
+
+
+
+
 
 
 
 # Homework
-# 1. Make it possible to navigate though the website with the browser "back-button"
-# e.g.: A back button from /students/edit to /students and from /students/edit to / 
-# Students for everything
+# 1. Show a user warning before deleting the student
+
+# 1. Show a message where there is no items (students/teacher...): for list
+
+# 1. Use icons/images instead of text for actions (e.g. edit, delete)
+
+
 
 if __name__ == "__main__":
     app.run(threaded=False, processes=1, debug=True)

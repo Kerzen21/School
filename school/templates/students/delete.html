@@ -1,17 +1,7 @@
-<<<<<<< HEAD
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>School management project - Students</title>
-    </head>
-    <body>
-        The Student was deleted
-        <a href="/students">Home</a>
-    </body>
-</html>
-=======
 {% extends "students/base.html" %}
 {% block content %}
-    The Student was deleted
+
+    <a href="/students/delete?id={{studentid}}&confirmation=1"><button>Yes, delete!</button> </a>
+    <a href="http://127.0.0.1:5000/students/list"><button>No, return!</button></a>
+    
 {% endblock %}
->>>>>>> Addition of a Base.html file | Base in every file/ Saves space | Gunicorn installed | old changes

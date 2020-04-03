@@ -1,6 +1,10 @@
 {% extends "students/base.html" %}
 {% block content %}
-    {% for student in students %}
-        {{student}} <a href="/students/edit?id={{student.studentid}}">Edit</a>  <a href="/students/delete?id={{student.studentid}}">Delete</a><br>
-    {% endfor %}      
+    {% if students %}
+        {% for student in students %}
+            {{student}} <a href="/students/edit?id={{student.studentid}}">Edit</a>  <a href="/students/delete?id={{student.studentid}}">Delete</a><br>
+        {% endfor %}     
+    {% else %}
+        No existing students
+    {% endif %}
 {% endblock %}
