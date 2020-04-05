@@ -2,8 +2,11 @@
 {% block content %}
     {% if students %}
         {% for student in students %}
-            {{student}} <a href="/students/edit?id={{student.studentid}}">Edit</a>  <a href="/students/delete?id={{student.studentid}}">Delete</a><br>
-        {% endfor %}     
+            <div class="student_list_item">
+                {{student}} <a href="/students/edit?id={{student.studentid}}"><img src="{{url_for('static', filename='images/edit-icon.png')}}" alt="Edit"></a>  <a href="/students/delete?id={{student.studentid}}"><img src="{{url_for('static', filename='images/delete-icon.png')}}" alt="Delete"></a><br>
+            </div>
+        {% endfor %} 
+
     {% else %}
         No existing students
     {% endif %}

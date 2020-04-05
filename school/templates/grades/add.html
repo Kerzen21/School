@@ -1,0 +1,17 @@
+{% extends "students/base.html" %}
+
+{% block content %}
+<form action="#" method="POST">
+    <label for="subjid">Subjectid: </label>
+    <input id="subjid" type="text" name ="subjid">
+    <br>
+    <label for="sdtid">Studentid: </label>
+    <input id="sdtid" type="text" name="sdtid">
+    <br>
+    <label for="grade">Grade: </label>
+    <input id="grade" type="text" name="grade">
+    <br>
+    <input type="submit">
+    <input type="reset">   
+</form>
+{% endblock %}

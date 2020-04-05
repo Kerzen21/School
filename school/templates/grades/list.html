@@ -1,0 +1,13 @@
+{% extends "grades/base.html" %}
+{% block content %}
+    {% if grades %}
+        {% for grade in grades %}
+            <div class="grade_list_item">
+                {{grade}} <a href="/grades/edit?id={{grade.gradeid}}"><img src="{{url_for('static', filename='images/edit-icon.png')}}" alt="Edit"></a>  <a href="/grades/delete?id={{grade.gradeid}}"><img src="{{url_for('static', filename='images/delete-icon.png')}}" alt="Delete"></a><br>
+            </div>
+        {% endfor %} 
+
+    {% else %}
+        No existing grades
+    {% endif %}
+{% endblock %}

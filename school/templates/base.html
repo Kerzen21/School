@@ -4,6 +4,7 @@
         {% block head %}
         <title>School management project</title>
         {% endblock %}
+        <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
     </head>
     <body>
         <header>
@@ -29,8 +30,7 @@
                 {% block nav %}
                     <a href="/">Home</a>  
                     <a href="/students">Students</a>
-
-                    <br>
+                    <a href="/grades">Grades</a>
                     {% block nav_section %}
                     {% endblock %}
                 {% endblock %}
