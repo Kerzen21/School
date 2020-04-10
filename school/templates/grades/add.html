@@ -6,7 +6,14 @@
     <input id="subjid" type="text" name ="subjid">
     <br>
     <label for="sdtid">Studentid: </label>
-    <input id="sdtid" type="text" name="sdtid">
+    <select name="sdtid" id="sdtid">
+        {% if students %}
+            <option value="{{students[0].studentid}}" selected>{{students[0].firstname+students[0].lastname}}</option>
+                {% for student in students[1:] %}
+                    <option value="{{student.studentid}}">{{student.firstname+student.lastname}}</option>
+                {% endfor %}
+        {% endif %}
+    </select>
     <br>
     <label for="grade">Grade: </label>
     <input id="grade" type="text" name="grade">

@@ -1,9 +1,34 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 app = Flask(import_name=__name__)
-app.config["SECRET_KEY"] = "askjhdfaskdjfhaksdjfhasdkjfahsdkfjashdfjasdhf"
-from . import dao
 from . import models
- 
+from . import dao
+import random
+import string
+import os
+def randomString(stringLength=20):
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
+env = os.environ
+
+# app.config["SECRET_KEY"] = "password"
+key = "SCHOOL_SECRET_KEY"
+
+## start init
+app.config["SECRET_KEY"] = randomString()
+if key in env:
+    if env[key] != "":
+        app.config["SECRET_KEY"] = env[key]
+## end init
+
+
+
+# 1. In web.py, the value `app.config["SECRET_KEY"]` should absolutely not be visible in code Change the code as follows:
+#     1. If the user has set an environment variable with the name "SCHOOL_SECRET_KEY" (e.g. we have been using the environment variable "FLASK_APP"),
+#     then use its value. (Python documentation / Google)
+#     1. Otherwise, generate a random string of at least 20 characters and use it as the secret key.
+
+
 
 """
 /
@@ -42,14 +67,19 @@ def grades_handle():
 @app.route("/grades/add", methods=["GET", "POST"])
 def grades_add():
     if request.method == "GET": 
-        return render_template("grades/add.html")
+        students = []
+        for student in dao.StudentDAO.get_all():
+            students.append(student)
+            print(students)
+        return render_template('grades/add.html', students=students)
     else:
         subjectid = request.form.get("subjid", "")
         studentid = request.form.get("sdtid", "")
         grade_grade = request.form.get("grade", "")
         grade = models.Grade(subjectid, studentid, grade_grade)
         dao.GradeDAO.save(grade)
-        flash(f"The Grade has been added!") 
+        flash(f"The Grade has been added!")
+        print(request.form) 
         return redirect("/grades") 
 
 @app.route("/grades/list", methods=["GET"])
@@ -133,16 +163,34 @@ def student_delete():
 
 #-->tube.ddns.net:5000
 
+### Homework
+# 1. extend the grades handler with edit and delete
+# 1. add the missing handlers:
+#   1. teacher (add, delete, edit, list)
+#   1. subject (add, delete, edit, list)
+#       1. teacher id should be a from a list of available teachers
+# 1. extend grades/add and grades/edit to have subjectid as a dropdown from available teachers
+# 1. Subject can be added without a teacher!!!
 
 
-# Homework (new)
-# 1. In grade/add add a dropdown menu so that the id of a student can be selected based on his full name.
-# 1. In web.py, the value `app.config["SECRET_KEY"]` should absolutely not be visible in code Change the code as follows:
-#     1. If the user has set an environment variable with the name "SCHOOL_SECRET_KEY" (e.g. we have been using the environment variable "FLASK_APP"),
-#     then use its value. (Python documentation / Google)
-#     1. Otherwise, generate a random string of at least 20 characters and use it as the secret key.
 
 
+
+
+#from flask import make_response
+#
+#
+#@app.route("/set-cookie")
+#def set_cookie():
+#    resp = make_response("")
+#    resp.set_cookie("username", "I am a cookie - master")
+#    return resp
+#
+#@app.route("/get-cookie")
+#def get_cookie():
+#    username = request.cookies.get('username')
+#    return f"Hello {username}"
+#
 
 
 
