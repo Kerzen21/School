@@ -1,4 +1,5 @@
-from flask import Flask, request, render_template, redirect, url_for, flash
+from flask import Flask, request, render_template, redirect, url_for, flash, session
+from functools import wraps
 app = Flask(import_name=__name__)
 from . import models
 from . import dao
@@ -23,10 +24,6 @@ if key in env:
 
 
 
-# 1. In web.py, the value `app.config["SECRET_KEY"]` should absolutely not be visible in code Change the code as follows:
-#     1. If the user has set an environment variable with the name "SCHOOL_SECRET_KEY" (e.g. we have been using the environment variable "FLASK_APP"),
-#     then use its value. (Python documentation / Google)
-#     1. Otherwise, generate a random string of at least 20 characters and use it as the secret key.
 
 
 
@@ -55,16 +52,104 @@ if key in env:
 """
 
 
+
+def get_hash(message):
+    base = 31
+    for c in message:
+        base *= ord(c)
+    
+    base %= 1000000000
+    return str(base)
+
+
+admin_pwd = os.environ.get("ADMIN_PASSWORD")
+logindata = dict()
+if admin_pwd:
+    logindata["Tim"] = get_hash(admin_pwd)
+# MD5
+# SHA-1
+print(logindata)
+
+
+LOGGED_IN_KEY = "IS_LOGGED_IN"
+
+
+@app.route('/login', methods=["POST", "GET"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html")
+    else:
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
+        if username in logindata:
+            if logindata[username] == get_hash(password):
+                flash("Login succesfull")
+                session[LOGGED_IN_KEY] = True
+                print(request.args, "but going back to the homepage")
+                next_url = request.args.get("next", "/")
+                # if next is not None:
+                #     return redirect(request.args["next"])
+                return redirect(next_url)
+            else:
+                flash("Username or Password invalid")
+        else:
+            flash("Username or Password invalid")
+        return redirect(url_for("login", **request.args))
+
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get(LOGGED_IN_KEY, False):
+            return redirect(url_for("login", next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+
 @app.route("/", methods=["GET"])
+@login_required
 def index():
     return render_template("index.html", my_variable="1024")
+
 @app.route("/grades", methods=["GET"])
+@login_required
 def grades_handle():
     return render_template("grades/index.html")
 
+@app.route("/grades/edit", methods=["GET", "POST"]) #Speichert edited als neue Grade
+@login_required
+def grade_edit():
+    gradeid = request.args.get("id")
+    print(gradeid)
+    if request.method == "GET":
+        return render_template("grades/edit.html", grade=dao.GradeDAO.get(gradeid))
+    else: 
+        print(gradeid, "2.")
+        subjectid = request.form.get("subjid", "")
+        studentid = request.form.get("sdtid", "")
+        grade_grade = request.form.get("grade", "")
+        grade = models.Grade(subjectid, studentid, grade_grade,gradeid)
+        dao.GradeDAO.save(grade)
+        flash(f"The grade with id <{gradeid}> has been edited!") 
+        return redirect("/grades/list")
 
+@app.route("/grades/delete")       #PLS Explain Put!!! and patch https://developer.mozilla.org/de/docs/Web/HTTP/Methods
+@login_required
+def grades_delete():
+    gradeid = request.args.get("id")
+    if 'confirmation' in request.args:
+        grade = dao.GradeDAO.get(gradeid)
+        dao.GradeDAO.delete(grade)
+        flash(f"The grade with id <{gradeid}> has been deleted!")
+
+        return redirect("/grades/list")
+    else:
+        return render_template("grades/delete.html", gradeid=gradeid)
 
 @app.route("/grades/add", methods=["GET", "POST"])
+@login_required
 def grades_add():
     if request.method == "GET": 
         students = []
@@ -83,6 +168,7 @@ def grades_add():
         return redirect("/grades") 
 
 @app.route("/grades/list", methods=["GET"])
+@login_required
 def grade_list():
     all_grades = dao.GradeDAO.get_all()   #-->No IF and Else needed // request(ed).Method 
     #return str(all_students)                  #only allows given methods to be used!
@@ -91,6 +177,7 @@ def grade_list():
 #------------------------------------------
 
 @app.route("/students/list", methods=["GET"])
+@login_required
 def student_list():
     all_students = dao.StudentDAO.get_all()   #-->No IF and Else needed // request(ed).Method 
     #return str(all_students)                  #only allows given methods to be used!
@@ -98,11 +185,13 @@ def student_list():
 
 
 @app.route("/students", methods=["GET"])
+@login_required
 def students_handle():
     return render_template("students/index.html")
 
 
 @app.route("/students/add", methods=["GET", "POST"])
+@login_required
 def student_add():
     if request.method == "GET": 
         return render_template("students/add.html")
@@ -120,6 +209,7 @@ def student_add():
 
 
 @app.route("/students/edit", methods=["GET", "POST"])       #PLS Explain Put!!! and patch https://developer.mozilla.org/de/docs/Web/HTTP/Methods
+@login_required
 def student_edit():
     #"/students/edit?id=1"
     studentid = request.args.get("id")
@@ -138,6 +228,7 @@ def student_edit():
         return redirect("/students/list")
 
 @app.route("/students/delete")       #PLS Explain Put!!! and patch https://developer.mozilla.org/de/docs/Web/HTTP/Methods
+@login_required
 def student_delete():
     print(request.args)
     studentid = request.args.get("id")
@@ -151,17 +242,10 @@ def student_delete():
     else:
         return render_template("students/delete.html", studentid=studentid)
 
-
-
-
-# ssh school@tube.ddns.net
-# activate an the environment: env:
-# source env/bin/activate
-
-# gunicorn starten:
-# gunicorn --bind :5000 school.web:app
-
-#-->tube.ddns.net:5000
+@app.route("/logout")      
+def logout():
+     session[LOGGED_IN_KEY] = False
+     return redirect("/")
 
 ### Homework
 # 1. extend the grades handler with edit and delete
@@ -175,25 +259,11 @@ def student_delete():
 
 
 
-
-
-#from flask import make_response
-#
-#
-#@app.route("/set-cookie")
-#def set_cookie():
-#    resp = make_response("")
-#    resp.set_cookie("username", "I am a cookie - master")
-#    return resp
-#
-#@app.route("/get-cookie")
-#def get_cookie():
-#    username = request.cookies.get('username')
-#    return f"Hello {username}"
-#
+from flask import session
 
 
 
 
+    
 if __name__ == "__main__":
     app.run(threaded=False, processes=1, debug=True)

@@ -1,0 +1,19 @@
+{% extends "grades/base.html" %}
+
+{% block content %}
+<form action="#" method="POST">      
+    <input id="id" type="hidden" name ="id" value="{{grade.gradeid}}">
+    <br>
+    <label for="subjid">Subjectid: </label>      
+    <input id="subjid" type="text" name ="subjid" value="{{grade.subjectid}}">
+    <br>
+    <label for="sdtid">Studentid: </label>
+    <input id="sdtid" type="text" name="sdtid" value="{{grade.studentid}}">
+    <br>
+    <label for="grade">Grade: </label>
+    <input id="grade" type="text" name="grade" value="{{grade.grade}}">
+    <br>
+    <input type="submit">
+    <input type="reset">
+     
+{% endblock %}
