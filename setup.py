@@ -25,6 +25,9 @@ setup(
     install_requires=packages,
     license='...',
     classifiers=[],  #https://pypi.org/classifiers/
+
+    include_package_data=True,
+    f
 )
 
 # pip install git+URL_TO_PROJECT
