@@ -1,0 +1,8 @@
+include README.md
+include school.sql
+include school/statics/*.*
+include school/statics/css/*.*
+include school/statics/images/*.*
+include school/templates/*.*
+include school/templates/grades/*.*
+include school/templates/students/*.*

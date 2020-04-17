@@ -269,8 +269,18 @@ def variable_handle(path):
     return f"This is the path: {path}"
 
 
+@app.route("/variable/<int:path>")
+def variable_handle(path):
+    #uuid 123e4567-e89b-12d3-a456-426655440000 are accepted
+    #int, string, path, uuid
+    print("This is the path!!! int", path)
+    return f"This is the path: {path}"
 
 
     
 if __name__ == "__main__":
     app.run(threaded=False, processes=1, debug=True)
+
+
+# pip install git+https...gith...shool
+# gunicorn --bind :5000 school.web:app
