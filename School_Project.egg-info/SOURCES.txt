@@ -1,0 +1,13 @@
+README.md
+setup.py
+School_Project.egg-info/PKG-INFO
+School_Project.egg-info/SOURCES.txt
+School_Project.egg-info/dependency_links.txt
+School_Project.egg-info/requires.txt
+School_Project.egg-info/top_level.txt
+school/__init__.py
+school/cli.py
+school/dao.py
+school/gui.py
+school/models.py
+school/web.py

@@ -3,15 +3,16 @@
 {% block content %}
 <form action="#" method="POST">
     <label for="subjid">Subjectid: </label>
-    <input id="subjid" type="text" name ="subjid">
+    <input id="subjid" type="text" name="subjid">
     <br>
     <label for="sdtid">Studentid: </label>
     <select name="sdtid" id="sdtid">
+        <option value="{{blank_id}}">No student</option>
         {% if students %}
-            <option value="{{students[0].studentid}}" selected>{{students[0].firstname+students[0].lastname}}</option>
-                {% for student in students[1:] %}
-                    <option value="{{student.studentid}}">{{student.firstname+student.lastname}}</option>
-                {% endfor %}
+        <!-- <option value="{{students[0].studentid}}" selected>{{students[0].firstname+students[0].lastname}}</option> -->
+        {% for student in students[1:] %}
+        <option value="{{student.studentid}}">{{student.firstname+student.lastname}}</option>
+        {% endfor %}
         {% endif %}
     </select>
     <br>
@@ -19,6 +20,6 @@
     <input id="grade" type="text" name="grade">
     <br>
     <input type="submit">
-    <input type="reset">   
+    <input type="reset">
 </form>
 {% endblock %}
