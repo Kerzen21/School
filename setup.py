@@ -28,8 +28,3 @@ setup(
 
     include_package_data=True,
 )
-
-# pip install git+URL_TO_PROJECT
-# ssh tim@tube.ddns.net
-# source env/bin/activates
-# https://covid19.missing.cm/
