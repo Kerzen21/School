@@ -1,5 +1,5 @@
 include README.md
-include school.sql
+include school/school.sql
 include school/statics/*.*
 include school/statics/css/*.*
 include school/statics/images/*.*

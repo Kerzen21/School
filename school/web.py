@@ -263,18 +263,6 @@ def logout():
 
 
 
-@app.route("/variable/<path>")
-def variable_handle(path):
-    print("This is the path!!!", path)
-    return f"This is the path: {path}"
-
-
-@app.route("/variable/<int:path>")
-def variable_handle(path):
-    #uuid 123e4567-e89b-12d3-a456-426655440000 are accepted
-    #int, string, path, uuid
-    print("This is the path!!! int", path)
-    return f"This is the path: {path}"
 
 
     

@@ -5,14 +5,27 @@ import sqlite3
 # from models import Subject
 
 from .models import Grade, Student, Teacher, Subject
+import os
+os.path.sep
+# os.path.join() 
+# os.path.split("path....") ==> vater_path, datei/child_path
+
+# os.path.join(os.path.split(__file__)[0], "school.sql")
+
 
 db_filename = "database.sqlite3"    #.db, .db3, .sqlite, .sqlite3
-db_create_script = "school.sql"
+school_path = __file__
+
+school_split = []
+
+school_split = school_path.split(os.path.sep)
+school_split.pop(-1)
+school_split.append("school.sql")
+seperator = os.path.sep
+school_final_path = seperator.join(school_split)
 
 
-
-# Tell the database to return results as dictionnaries
-# con.row_factory = sqlite3.Row
+db_create_script = str(school_final_path)
 
 
 def get_db_connection(db_filename):
